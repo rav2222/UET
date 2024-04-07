@@ -17,17 +17,18 @@ T = (){};+*=, int, bool, <Id>, <Number>, <ROP>, do, while, if, then, else, print
 <stmtList>    ->  <stmt>;<stmtList> | epsilon
 
 <stmt>  -> if <Expr> then { <stmtList> }
-        | if <Expr> then { <stmtList> } else { <stmtList> } 
         | do { <stmtList> } while (<Expr>)
         | <Assignment>
         | <Declaration>
         | print(<Expr>)                     // should be some function or just print?
 
+<ifTail> -> else { <stmtList> } | epsilon	// else part for IF command
 
 <Type>          -> int | bool
 <Declaration>   -> <Type> <L>
-<L>             -> <L1>,  <L> | <L1>        // Multiple variables declaration
-<L1>            -> <Id> | <Assign-stmt> 
+<L>             -> <L1><L2>
+<L1>            -> <Id> | <Assign-stmt>
+<L2>		-> , <L> | epsilon		// Multiple variables declaration
 
 <Assignment> -> <Id> = <Expr>               // int a = true: should be caught on next phase, not parser
 
@@ -37,12 +38,14 @@ T = (){};+*=, int, bool, <Id>, <Number>, <ROP>, do, while, if, then, else, print
 ```
 <Expr>      -> <C> | <M-Expr>
 <C>         -> <M-Expr> <ROP> <M-Expr>           // <ROP> is right-associative
-<M-Expr>    -> <Term> + <M-Expr> | <Term>
+<M-Expr>    -> <Term> <METail>
+<METail>    -> + <M-Expr> | epsilon
 <Y>         -> Id | Number
 
 # right-associative
-<Term>      ->  <Factor> * <Term> |   <Factor> 
+<Term>      -> <Factor> <T2>
 <Factor>    -> <Y> | (<M-Expr>) 
+<T2>        -> * <Term> | epsilon
 ```
 
 ## \ ⚙️  Implementing  <a name="implementing"></a>
